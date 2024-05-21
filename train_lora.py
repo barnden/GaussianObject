@@ -9,6 +9,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from cldm.model import create_model, load_state_dict
 from cldm.logger import ImageLogger, LoraCheckpoint
 from dataset_lora import GSCacheDataset
+from CO3D import WarpCO3DDataset
 from torch.utils.data import DataLoader
 from minlora import add_lora, LoRAParametrization
 
@@ -79,19 +80,24 @@ if __name__ == '__main__':
         add_lora(model.cond_stage_model, lora_config=lora_config)
 
     exp_path = os.path.join('./output', args.exp_name)
-    dataset = GSCacheDataset(
-        args.gs_dir, args.data_dir, args.loo_dir,
-        prompt=args.prompt,
-        bg_white=args.bg_white,
-        train=True,
-        manual_noise_reduce_gamma=args.manual_noise_reduce_gamma,
-        manual_noise_reduce_start=args.manual_noise_reduce_start,
-        sh_degree=args.sh_degree,
-        image_size=args.image_size,
-        resolution=args.resolution,
-        sparse_num=args.sparse_num,
-        use_prompt_list=args.use_prompt_list,
-        cache_max_iter=args.cache_max_iter
+    # dataset = GSCacheDataset(
+    #     args.gs_dir, args.data_dir, args.loo_dir,
+    #     prompt=args.prompt,
+    #     bg_white=args.bg_white,
+    #     train=True,
+    #     manual_noise_reduce_gamma=args.manual_noise_reduce_gamma,
+    #     manual_noise_reduce_start=args.manual_noise_reduce_start,
+    #     sh_degree=args.sh_degree,
+    #     image_size=args.image_size,
+    #     resolution=args.resolution,
+    #     sparse_num=args.sparse_num,
+    #     use_prompt_list=args.use_prompt_list,
+    #     cache_max_iter=args.cache_max_iter
+    # )
+    dataset = WarpCO3DDataset(
+        root='./data',
+        prompt="a photo of [V]",
+        rare_token=args.prompt
     )
     dataloader = DataLoader(dataset, num_workers=0, batch_size=args.batch_size, shuffle=True)
     loggers = [
